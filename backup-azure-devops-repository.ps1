@@ -57,7 +57,7 @@ $startTime = Get-Date
 az extension add --name 'azure-devops'
 
 #Set this environment variable with a PAT will 'auto login' when using 'az devops' commands
-$env:AZURE_DEVOPS_EXT_PAT = $PAT
+$env:AZURE_DEVOPS_EXT_PAT = $PA
 $B64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("`:$PAT"))
 
 Write-Host "=== Get project list"
