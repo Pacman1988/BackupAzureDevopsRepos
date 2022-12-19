@@ -30,10 +30,10 @@ For this backup script you'll only need to generate a PAT with read access on Co
     ./backup-azure-devops-repository.ps1 -Organization 'DEVOPS_ORG_URL' -PAT DEVOPS_PAT -BackupDir 'BACKUP_DIRECTORY' -DryRun $true 
 
     Parameters:
-       -o | --organization: 
+       -o | -Organization: 
             The azure devops organisation URL (eg: https://dev.azure.com/my-company)
-       -d | --directory: 
+       -d | -BackupDir: 
             The directory where to store the backup archive.
-       -p | --pat: The Personnal Access Token (PAT) that you need to generate for your Azure Devops Account
-       -x|--dryrun: true/false - If you want to create a dummy file instead of cloning the repositories
-       -v|--verbose true/false - Verbose mode
+       -p | -PAT: The Personnal Access Token (PAT) that you need to generate for your Azure Devops Account
+       -x|-DryRun: true/false - If you want to create a dummy file instead of cloning the repositories
+       -r|-RetentionDays 7 - Retention in days
