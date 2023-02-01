@@ -135,5 +135,5 @@ if ($RetentionDays -eq 0) {
 else 
 {
    Write-Host "=== Apply retention policy ($RetentionDays days)"
-   Get-ChildItem "$BackupDir\*.zip" -Recurse -Force | Where-Object { !$_.PSIsContainer -and $_.CreationTime -lt $RetentionDays } | Remove-Item -Force
+   Get-ChildItem $BackupDir -Recurse -Force -Directory  | Where-Object {$_.CreationTime -le $(get-date).Adddays(-$RetentionDays)} | Remove-Item -Force -Recurse
 }
