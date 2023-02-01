@@ -35,5 +35,5 @@ For this backup script you'll only need to generate a PAT with read access on Co
        -d | -BackupDir: 
             The directory where to store the backup archive.
        -p | -PAT: The Personnal Access Token (PAT) that you need to generate for your Azure Devops Account
-       -x|-DryRun: true/false - If you want to create a dummy file instead of cloning the repositories
-       -r|-RetentionDays 7 - Retention in days
+       -x | -DryRun: true/false - If you want to create a dummy file instead of cloning the repositories
+       -r | -RetentionDays 7 - Retention in days
