@@ -30,6 +30,10 @@ param(
    [Alias('p')]
    [string]$PAT,
 
+   [Parameter(HelpMessage="Writes an transcript log to given file")]
+   [Alias('l')]
+   [string]$logfile,
+
    [Parameter()]
    [Alias('r')]
    [int]$RetentionDays,
@@ -38,6 +42,8 @@ param(
    [Alias('x')]
    [bool]$DryRun = $false
 )
+
+if ($logfile) { Start-Transcript $logfile}
 
 Write-Host "=== Script parameters"
 Write-Host "ORGANIZATION_URL  = $Organization"
@@ -101,7 +107,11 @@ foreach ($project in $projectList) {
          $repo | ConvertTo-Json >> "$currentRepoName-definition.json"
       }
       else {
-         git -c http.extraHeader="Authorization: Basic $B64Pat" clone $($repo.webUrl) $currentRepoDirectory
+         if ($repo.isDisabled) {
+            Write-Host "====> Skipping disabled repo: [$($repo.name)]"
+         } else {
+            git -c http.extraHeader="Authorization: Basic $B64Pat" clone $($repo.webUrl) $currentRepoDirectory
+         }
       }
 
       $repoCounter++
@@ -117,10 +127,17 @@ $backupSizeUncompressed= "{0:N2}" -f ((Get-ChildItem -path $backupDirectory -rec
 
 Set-Location $backupDirectory
 Write-Host "=== Compress folder"
-Compress-Archive -Path . -DestinationPath "$backupFolder.zip" -CompressionLevel Optimal
-$backupSizeCompressed="{0:N2}" -f ((Get-ChildItem $backupFolder.zip | Measure-Object -property length -sum ).sum /1MB) + "MB"
-Write-Host "=== Remove raw data in folder"
-Get-ChildItem -Directory | Remove-Item -Force -Recurse
+if (Test-Path -Path 'C:\Program Files\7-Zip\7z.exe' -PathType Leaf) {
+   # Use 7-zip to compress the files when available
+   & 'C:\Program Files\7-Zip\7z.exe' a -r -sdel -mx9 -y "$backupFolder.7z"  .
+   $backupSizeCompressed="{0:N2}" -f ((Get-ChildItem "$backupFolder.7z" | Measure-Object -property length -sum ).sum /1MB) + "MB"
+} else {
+   # Use default builtin command. Might skip hidden folders like .git 
+   Compress-Archive -Path . -DestinationPath "$backupFolder.zip" -CompressionLevel Optimal
+   $backupSizeCompressed="{0:N2}" -f ((Get-ChildItem $backupFolder.zip | Measure-Object -property length -sum ).sum /1MB) + "MB"
+   Write-Host "=== Remove raw data in folder"
+   Get-ChildItem -Directory | Remove-Item -Force -Recurse
+}
 
 Write-Host "=== Backup completed ==="
 Write-Host  "Projects : $projectCounter"
@@ -137,3 +154,4 @@ else
    Write-Host "=== Apply retention policy ($RetentionDays days)"
    Get-ChildItem $BackupDir -Recurse -Force -Directory  | Where-Object {$_.CreationTime -le $(get-date).Adddays(-$RetentionDays)} | Remove-Item -Force -Recurse
 }
+if ($logfile) { Stop-Transcript }
