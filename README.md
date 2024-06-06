@@ -27,13 +27,21 @@ For this backup script you'll only need to generate a PAT with read access on Co
 
 ### Launch script
 
-    ./backup-azure-devops-repository.ps1 -Organization 'DEVOPS_ORG_URL' -PAT DEVOPS_PAT -BackupDir 'BACKUP_DIRECTORY' -DryRun $true 
+    ./backup-azure-devops-repository.ps1 -Organization 'DEVOPS_ORG_URL' -PAT DEVOPS_PAT -BackupDir 'BACKUP_DIRECTORY' -DryRun 
 
     Parameters:
        -o | -Organization: 
             The azure devops organisation URL (eg: https://dev.azure.com/my-company)
+            If you only have one location you can set it as default for the parameter
        -d | -BackupDir: 
             The directory where to store the backup archive.
+            You can specify a default for this parameter in the code
        -p | -PAT: The Personnal Access Token (PAT) that you need to generate for your Azure Devops Account
-       -x | -DryRun: true/false - If you want to create a dummy file instead of cloning the repositories
-       -r | -RetentionDays 7 - Retention in days
+       -f | -RepoFilter: Specify a name filter to include only matching repositories (default = *)
+       -l | -LogFile: specify a transcript log file. Path based on current folder
+            fe: -LogFile "C:\Temp\DevopsBackup_$(Get-Date -f 'yyyyMMdd_HHmm').log"
+       -c | -CompressMethod: Specify to use 7z or builtin zip compression (default = 7z)
+            If 7z is installed at non standard location update the location in the code. To install run 'winget install 7zip.7zip'
+            if 7z is specified but not found internal zip is used. (Be aware the buildin zip only supports archives up to 2Gb.)
+       -x | -DryRun - If you want to create a dummy file instead of cloning the repositories specify -DryRun
+       -r | -RetentionDays 7 - Retention in days before archives are removed. (0=never)
