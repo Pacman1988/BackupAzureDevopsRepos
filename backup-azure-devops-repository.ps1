@@ -93,7 +93,17 @@ $env:AZURE_DEVOPS_EXT_PAT = $PAT
 $B64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("`:$PAT"))
 
 Write-Host "=== Get project list"
-$projectList = az devops project list --organization $Organization --query 'value[]' | ConvertFrom-Json
+try {
+    $projectListRaw = az devops project list --organization $Organization --query 'value[]' 2>&1
+    if ($projectListRaw -match "expired|Access Denied|Unauthorized") {
+        throw "The Personal Access Token (PAT) is expired or invalid. Please renew or update it."
+    }
+    $projectList = $projectListRaw | ConvertFrom-Json
+} catch {
+    Write-Error $_
+    if ($logfile) { Stop-Transcript }
+    exit 1
+}
 
 #Create backup folder with current time as name
 $backupFolder= Get-Date -Format "yyyyMMddHHmm"
